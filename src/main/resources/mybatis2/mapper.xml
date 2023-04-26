@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="shop">
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        m.USER_IDX,
+        m.USER_ID,
+        p.PASSWORD,
+        pf.USER_NAME,
+        ma.CELLPHONE,
+        pf.ADDRESS,
+        ma.EMAIL,
+        pf.INTRODUCTION,
+        pf.JOIN_DATE,
+        ma.GENDER,
+        m.LOGIN_TYPE,
+        m.USER_TYPE
+    </sql>
+    <sql id="Table_List">
+        MEMBER_USER m,
+        AUTH_PASSWORD p,
+        MEMBER_PROFILE pf,
+        MEMBER_AUTHENTICATION ma
+    </sql>
+    <sql id="Join_List">
+        m.USER_IDX = p.USER_IDX
+        AND p.USER_IDX = pf.USER_IDX
+        AND pf.USER_IDX = ma.USER_IDX
+    </sql>
+    <!--  RegisterDAO 시작-->
+    <select id="findUserById" parameterType="string" resultType="com.shoppingmall.vo.UserVO">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="Table_List"/>
+        WHERE
+        <include refid="Join_List"/>
+        AND m.USER_ID = #{userId}
+        ORDER BY USER_IDX ASC
+    </select>
+    <select id="findUserByIdx" parameterType="_int" resultType="com.shoppingmall.vo.UserVO">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        <include refid="Table_List"/>
+        WHERE
+        <include refid="Join_List"/>
+        AND m.USER_IDX = #{userIdx}
+    </select>
+    <select id="findAllUser" resultType="com.shoppingmall.vo.UserVO">
+        SELECT
+        <include refid="Base_Column_List"/>
+
+        FROM
+        <include refid="Table_List"/>
+
+        WHERE
+        <include refid="Join_List"/>
+        ORDER BY USER_IDX ASC
+    </select>
+    <insert id="insertUser" parameterType="com.shoppingmall.vo.UserVO">
+        INSERT
+        ALL
+        INTO MEMBER_USER(USER_IDX, USER_ID, LOGIN_TYPE, USER_TYPE)
+        VALUES (MEMBER_USER_SEQ.NEXTVAL, #{userId}, #{loginType}, #{userType})
+        INTO AUTH_PASSWORD(PASSWORD_IDX, USER_IDX, PASSWORD)
+        VALUES (MEMBER_USER_SEQ.CURRVAL, MEMBER_USER_SEQ.CURRVAL, #{password})
+        INTO MEMBER_PROFILE(PROFILE_IDX, USER_IDX, USER_NAME, INTRODUCTION, JOIN_DATE, UPDATE_DATE, ADDRESS)
+        VALUES(MEMBER_USER_SEQ.CURRVAL, MEMBER_USER_SEQ.CURRVAL, #{userName}, #{introduction}, SYSDATE, SYSDATE,
+        #{address})
+        INTO MEMBER_AUTHENTICATION(AUTHENTICATION_IDX, USER_IDX, CELLPHONE, EMAIL, GENDER, AUTH_DATE)
+        VALUES(MEMBER_USER_SEQ.CURRVAL, MEMBER_USER_SEQ.CURRVAL, #{cellPhone}, #{email}, #{gender}, SYSDATE)
+        SELECT *
+        FROM DUAL
+    </insert>
+    <update id="updateUserStatus" parameterType="com.shoppingmall.vo.UserVO">
+        UPDATE MEMBER_USER
+        SET USER_STATUS = 1
+        WHERE USER_IDX = #{userIdx}
+    </update>
+    <update id="updateName" parameterType="map">
+        UPDATE MEMBER_PROFILE
+        SET USER_NAME = #{newName}
+        WHERE USER_IDX = #{userIdx}
+    </update>
+    <update id="updateCellphone" parameterType="map">
+        UPDATE MEMBER_AUTHENTICATION
+        SET CELLPHONE = #{newCellphone}
+        WHERE USER_IDX = #{userIdx}
+    </update>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
